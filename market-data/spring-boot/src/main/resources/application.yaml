@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: "its-marketdata"
+server:
+  port : 9100

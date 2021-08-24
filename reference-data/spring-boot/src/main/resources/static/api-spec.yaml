@@ -1,0 +1,279 @@
+openapi: 3.0.2
+info:
+  title: ITS Reference Data Service - OpenAPI 3.0
+  description: |-
+    ITS Reference Data Service based on the OpenAPI 3.0 specification
+  version: 1.0.0
+servers:
+  - url: http://localhost:9000/reference-data-service
+tags:
+  - name: currency
+    description: Currency Management in ITS System
+
+paths:
+  /v1/currencies:
+    post:
+      tags:
+        - currency
+      summary: Create currency
+      description: Create a new currency
+      operationId: createCurrency
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        description: Currency object to create
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCurrencyRequest'
+      responses:
+        201:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Currency'
+        400:
+          description: Input information is invalid
+          content:
+            application/json:
+              schema:
+                $ref: "../../../../../../resources/static/api-spec-component-1_0_0.yaml#/components/schemas/ErrorResponse"
+        500:
+          description: Unexpected error occurrs
+          content:
+            application/json:
+              schema:
+                $ref: "../../../../../../resources/static/api-spec-component-1_0_0.yaml#/components/schemas/ErrorResponse"
+    get:
+      tags:
+        - currency
+      summary: Find currency
+      description: Find currencies by criteria
+      operationId: findCurrency
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: code
+          schema:
+            type: string
+          required: false
+          description: Find user with matched userid (exact match)
+        - in: query
+          name: name
+          schema:
+            type: string
+          required: false
+          description: Find currency with matched name (case insenitive, partial match).  Must input at least 3 characters
+        - in: query
+          name: shortName
+          schema:
+            type: string
+          required: false
+          description: Find currency with matched short name (case insenitive, partial match).  Must input at least 3 characters
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+          required: false
+          description: Paging criteria, skip this number of record.  Default is 0
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 25
+            maximum: 200
+          required: false
+          description: Paging criteria, skip this number of record.  Default is 25
+        - in: query
+          name: sort
+          schema:
+            type: string
+#            default: code
+          required: false
+          description: Comma separated sorting criteria.  To sort in descending order, add "-" before the field.  E.g lastName,-email
+          example: lastName,-email
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageOfCurrency'
+        400:
+          description: Input search criteria is invalid
+          content:
+            application/json:
+              schema:
+                $ref: "../../../../../../resources/static/api-spec-component-1_0_0.yaml#/components/schemas/ErrorResponse"
+        500:
+          description: Unexpected error occurrs
+          content:
+            application/json:
+              schema:
+                $ref: "../../../../../../resources/static/api-spec-component-1_0_0.yaml#/components/schemas/ErrorResponse"
+
+  /v1/currencies/{currencyCode}:
+    get:
+      tags:
+        - currency
+      summary: Get a single currency
+      description: Get a single currency by currencyCode
+      operationId: getCurrency
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: currencyCode
+          schema:
+            type: string
+          required: true
+          description: Code of the currency to get
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Currency'
+        404:
+          description: No currency is found with input code
+          content:
+            application/json:
+              schema:
+                $ref: "../../../../../../resources/static/api-spec-component-1_0_0.yaml#/components/schemas/ErrorResponse"
+        500:
+          description: Unexpected error occurrs
+          content:
+            application/json:
+              schema:
+                $ref: "../../../../../../resources/static/api-spec-component-1_0_0.yaml#/components/schemas/ErrorResponse"
+    put:
+      tags:
+        - currency
+      summary: Update a single currency
+      description: Update a single currency by currency code
+      operationId: putCurrency
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: currencyCode
+          schema:
+            type: string
+          required: true
+          description: Code of the currency to update
+      requestBody:
+        required: true
+        description: Currency object to update
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Currency'
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Currency'
+        400:
+          description: Input information is invalid
+          content:
+            application/json:
+              schema:
+                $ref: "../../../../../../resources/static/api-spec-component-1_0_0.yaml#/components/schemas/ErrorResponse"
+        404:
+          description: No currency is found with input code
+          content:
+            application/json:
+              schema:
+                $ref: "../../../../../../resources/static/api-spec-component-1_0_0.yaml#/components/schemas/ErrorResponse"
+        default:
+          description: Unexpected error occurrs
+          content:
+            application/json:
+              schema:
+                $ref: "../../../../../../resources/static/api-spec-component-1_0_0.yaml#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    CreateCurrencyRequest:
+      type: object
+      required:
+        - currencyCode
+        - name
+        - shortName
+        - decimalPlace
+      properties:
+        currencyCode:
+          type: string
+          description: ISO Currency Code
+          example: HKD
+          minLength: 3
+          maxLength: 3
+        name:
+          type: array
+          items:
+            type: object
+            required:
+              - locale
+              - value
+            properties:
+              locale:
+                type: string
+                description: BCP-47 language tag
+                example: en
+                maxLength: 50
+              value:
+                type: string
+                description: Currency name in language specified by locale
+                example: Hong Kong Dollar
+                maxLength: 50
+        shortName:
+          type: array
+          items:
+            type: object
+            required:
+              - locale
+              - value
+            properties:
+              locale:
+                type: string
+                description: BCP-47 language tag
+                example: zh-Hant
+                maxLength: 10
+              value:
+                type: string
+                description: Currency name in language specified by locale
+                example: 港幣
+                maxLength: 10
+        decimalPlace:
+          type: integer
+          format: int32
+          description: Number of decimal points supported
+
+    Currency:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CreateCurrencyRequest'
+      required:
+        - version
+      properties:
+        version:
+          type: integer
+          format: int64
+
+    PageOfCurrency:
+      type: object
+      allOf:
+        - $ref: "../../../../../../resources/static/api-spec-component-1_0_0.yaml#/components/schemas/PageInformation"
+
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Currency'

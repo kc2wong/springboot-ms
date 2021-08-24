@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: "its-refdata"
+    pageSize:
+      default: 50
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/its_refdata
+    password: zaq12wsx
+    username: dbadmin
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+kafka:
+  bootstrapAddress: "localhost:29092"
+server:
+  port : 9000

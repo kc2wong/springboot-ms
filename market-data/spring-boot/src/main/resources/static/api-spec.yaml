@@ -1,0 +1,87 @@
+openapi: 3.0.2
+info:
+  title: ITS Market Data Service - OpenAPI 3.0
+  description: |-
+    ITS Market Data Service based on the OpenAPI 3.0 specification
+  version: 1.0.0
+servers:
+  - url: http://localhost:9100/market-data-service
+tags:
+  - name: market data
+    description: Market Data Provider in ITS System
+
+paths:
+  /v1/market-price/{marketCode}/{instrumentLocalCode}:
+    get:
+      tags:
+        - market data
+      summary: Get market price of instrument
+      operationId: getInstrumentMarketPrice
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: marketCode
+          schema:
+            type: string
+          required: true
+          description: Market Code (e.g. HKG)
+        - in: path
+          name: instrumentLocalCode
+          schema:
+            type: string
+          required: true
+          description: Instrument Local Code (0005)
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketPrice'
+        400:
+          description: Input search criteria is invalid
+          content:
+            application/json:
+              schema:
+                $ref: "../../../../../../resources/static/api-spec-component-1_0_0.yaml#/components/schemas/ErrorResponse"
+        404:
+          description: Instrument is not found
+          content:
+            application/json:
+              schema:
+                $ref: "../../../../../../resources/static/api-spec-component-1_0_0.yaml#/components/schemas/ErrorResponse"
+        500:
+          description: Unexpected error occurrs
+          content:
+            application/json:
+              schema:
+                $ref: "../../../../../../resources/static/api-spec-component-1_0_0.yaml#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    MarketPrice:
+      type: object
+      required:
+        - type
+        - quotationTime
+        - currencyCode
+        - price
+      properties:
+        type:
+          type: string
+          enum:
+            - RealTime
+            - Delayed
+          x-enum-varnames:
+            - REAL_TIME
+            - DELAYED
+        quotationTime:
+          type: string
+          format: 'date-time'
+        currencyCode:
+          type: string
+          description: ISO currency code
+        price:
+          type: number
+          format: float
