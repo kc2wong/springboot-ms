@@ -20,16 +20,16 @@ A simple application that demonstrates microservice development with spring boot
 ![system-architecture](./docs/architecture.jpg)
 
 ##### Quickstart
-1. Setup the following infrastructure services
+1. Setup the following infrastructure services (https://github.com/kc2wong/docker-for-dev)
    * 1.1. MySQL
    * 1.2. Redis
    * 1.3. Apache Kafka
-2. Compile and deploy common library
-3. Compile and deploy referece-data-service
+2. Compile and deploy common library (https://github.com/kc2wong/springboot-ms/tree/main/library)
+3. Compile and deploy reference-data-service (https://github.com/kc2wong/springboot-ms/tree/main/reference-data)
    * 3.1. Compile and deploy rest-client
    * 3.2. Start spring-boot service
-4. Compile and deploy market-data-service
+4. Compile and deploy market-data-service (https://github.com/kc2wong/springboot-ms/tree/main/market-data)
    * 4.1. Compile and deploy rest-client
    * 4.2. Start spring-boot service
-5. Compile and start web-api
+5. Compile and start web-api (https://github.com/kc2wong/springboot-ms/tree/main/web-api)
 
