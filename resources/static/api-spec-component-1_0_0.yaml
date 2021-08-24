@@ -1,0 +1,46 @@
+components:
+  schemas:
+    PageInformation:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+          description: Starting record number (from 1) in matched result
+          example: 26
+        end:
+          type: integer
+          format: int32
+          description: Ending record number in matched result
+          example: 50
+        total:
+          type: integer
+          format: int32
+          example: 256
+          description: Total number of matched record
+
+    ErrorResponse:
+      type: object
+      required:
+        - errorCode
+        - errorMessage
+      properties:
+        errorCode:
+          type: string
+          description:  Error code
+          example: ERR-1234
+        errorParam:
+          type: array
+          items:
+            type: string
+            example: D81040
+        errorMessage:
+          type: string
+          description:  Error message in English
+          example: Currency HKD already exists
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
