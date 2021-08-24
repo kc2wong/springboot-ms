@@ -1,7 +1,6 @@
 package com.exiasoft.its.refdata.endpoint.rest.mapper
 
 import com.exiasoft.its.common.domain.model.Locale
-import com.exiasoft.its.common.endpoint.rest.mapper.BaseDtoMapper
 import com.exiasoft.its.common.util.EnumUtil
 import com.exiasoft.its.refdata.domain.model.Currency
 import com.exiasoft.its.refdata.endpoint.rest.model.CreateCurrencyRequestNameDto
@@ -11,7 +10,7 @@ import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.Mappings
 
-@Mapper(uses = [BaseDtoMapper::class], componentModel = "spring")
+@Mapper(componentModel = "spring")
 interface CurrencyDtoMapper {
 
     @Mappings(value = [

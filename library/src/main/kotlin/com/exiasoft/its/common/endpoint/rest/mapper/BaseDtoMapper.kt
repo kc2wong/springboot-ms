@@ -1,6 +1,7 @@
 package com.exiasoft.its.common.endpoint.rest.mapper
 
 import com.exiasoft.its.common.util.DateTimeUtil
+import org.springframework.stereotype.Component
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -15,7 +16,4 @@ class BaseDtoMapper {
         return offsetDateTime?.let { DateTimeUtil.offsetDateTime2Instant(it) }
     }
 
-    fun asBigDecimal(float: Float?) : BigDecimal? {
-        return float?.toBigDecimal()
-    }
 }

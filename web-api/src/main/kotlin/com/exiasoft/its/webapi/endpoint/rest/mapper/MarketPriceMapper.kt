@@ -7,11 +7,16 @@ import com.exiasoft.its.webapi.endpoint.rest.model.MarketPriceDto
 import org.mapstruct.AfterMapping
 import org.mapstruct.Mapper
 import org.mapstruct.MappingTarget
+import java.math.BigDecimal
 import java.math.RoundingMode
 
-@Mapper(uses = [BaseDtoMapper::class], componentModel = "spring")
+@Mapper(componentModel = "spring")
 abstract class MarketPriceMapper {
     protected abstract fun internalModel2Dto(marketPrice: MarketPrice, currency: Currency): MarketPriceDto
+
+    protected fun float2BigDecima(float: Float): BigDecimal {
+        return float.toBigDecimal()
+    }
 
     fun model2Dto(marketPrice: MarketPrice, currency: Currency): MarketPriceDto {
         val rtn = internalModel2Dto(marketPrice, currency)
