@@ -18,10 +18,13 @@ repositories {
 	mavenCentral()
 }
 
+extra["springCloudVersion"] = "2020.0.3"
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.kafka:spring-kafka")
+	implementation("org.springframework.cloud:spring-cloud-starter-sleuth")
 
 	implementation("javax.validation:validation-api:2.0.1.Final")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -47,6 +50,12 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
+dependencyManagement {
+	imports {
+		mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+	}
+}
+
 tasks.withType<KotlinCompile> {
 	kotlinOptions {
 		freeCompilerArgs = listOf("-Xjsr305=strict")
@@ -58,6 +67,10 @@ tasks.withType<Test> {
 	useJUnitPlatform()
 }
 
+tasks.compileKotlin {
+	dependsOn(tasks.openApiGenerate)
+}
+
 sourceSets {
 	main {
 		java.srcDirs("$buildDir/generated/src/main/kotlin", "$buildDir/generated/source/kapt/main")
@@ -65,7 +78,6 @@ sourceSets {
 }
 
 openApiGenerate {
-	auth.set("http://exiasoft.byethost7.com")
 	generatorName.set("kotlin-spring")
 	inputSpec.set("$projectDir/src/main/resources/static/api-spec.yaml")
 	outputDir.set("$buildDir/generated")
@@ -81,3 +93,4 @@ openApiGenerate {
 		"apiDocs" to "false"
 	))
 }
+

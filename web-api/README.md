@@ -5,7 +5,7 @@ To increase performance, Spring cache is used to cache currency object got from 
 
 To start spring boot application, run
 ```
-gradlew clean openApiGenerate bootRun
+gradlew clean bootRun
 ```
 
 To test the spring-boot application, run

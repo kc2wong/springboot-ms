@@ -18,10 +18,13 @@ repositories {
 	mavenCentral()
 }
 
+extra["springCloudVersion"] = "2020.0.3"
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-cache")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+	implementation("org.springframework.cloud:spring-cloud-starter-sleuth")
 	implementation("org.springframework.kafka:spring-kafka")
 
 	implementation("javax.validation:validation-api:2.0.1.Final")
@@ -52,11 +55,20 @@ dependencies {
 	testImplementation("org.springframework.kafka:spring-kafka-test")
 }
 
+dependencyManagement {
+	imports {
+		mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+	}
+}
+
 tasks.withType<KotlinCompile> {
 	kotlinOptions {
 		freeCompilerArgs = listOf("-Xjsr305=strict")
 		jvmTarget = "11"
 	}
+	dependsOn(
+		tasks.openApiGenerate
+	)
 }
 
 tasks.withType<Test> {
@@ -70,7 +82,6 @@ sourceSets {
 }
 
 openApiGenerate {
-	auth.set("http://exiasoft.byethost7.com")
 	generatorName.set("kotlin-spring")
 	inputSpec.set("$projectDir/src/main/resources/static/api-spec.yaml")
 	outputDir.set("$buildDir/generated")
@@ -79,13 +90,17 @@ openApiGenerate {
 	invokerPackage.set("com.exiasoft.its.webapi")
 	ignoreFileOverride.set("$projectDir/src/main/resources/.openapi-generator-ignore")
 	modelNameSuffix.set("Dto")
-	configOptions.set(mapOf(
-		"dateLibrary" to "java8",
-		"delegatePattern" to "true",
-		"useTags" to "true",
-		"apiDocs" to "false",
-	))
-	typeMappings.set(mapOf(
-		"kotlin.Float" to "java.math.BigDecimal"
-	))
+	configOptions.set(
+		mapOf(
+			"dateLibrary" to "java8",
+			"delegatePattern" to "true",
+			"useTags" to "true",
+			"apiDocs" to "false",
+		)
+	)
+	typeMappings.set(
+		mapOf(
+			"kotlin.Float" to "java.math.BigDecimal"
+		)
+	)
 }

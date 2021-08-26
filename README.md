@@ -12,6 +12,7 @@ A simple application that demonstrates microservice development with spring boot
 - Spring web for restful api development
 - Spring kafka to publish and subscribe domain events
 - Spring cache redis to cache data
+- Spring cloud sleuth for tracing
 - Adopt contract first approach with openAPI generator to generate stub code and rest client from openapi specification
 - Flyway migration to create database objects and initial data
 - mapstruct for data transformation between different layers
