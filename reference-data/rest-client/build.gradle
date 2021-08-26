@@ -1,0 +1,80 @@
+plugins {
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+    id 'org.openapi.generator' version '5.1.1'
+    id 'maven-publish'
+}
+
+group = 'com.exiasoft.its'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = 'reference-data-restclient'
+
+            from components.java
+        }
+    }
+}
+
+ext {
+    swagger_annotations_version = "2.1.10"
+    swagger_parser_version = "2.0.27"
+    jackson_version = "2.12.4"
+    jackson_databind_version = "2.12.4"
+    jackson_databind_nullable_version = "0.2.1"
+    spring_web_version = "5.3.9"
+}
+
+dependencies {
+    implementation "io.swagger.parser.v3:swagger-parser:$swagger_parser_version"
+    implementation "com.google.code.findbugs:jsr305:3.0.2"
+    implementation "org.springframework:spring-web:$spring_web_version"
+    implementation "org.springframework:spring-context:$spring_web_version"
+    implementation "com.fasterxml.jackson.core:jackson-core:$jackson_version"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jackson_databind_version"
+    implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jackson_version"
+    implementation "org.openapitools:jackson-databind-nullable:$jackson_databind_nullable_version"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version"
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+compileJava.dependsOn tasks.openApiGenerate
+
+sourceSets {
+    main.java.srcDirs = [
+            "$buildDir/generated/src/main/java"
+    ]
+}
+
+openApiGenerate {
+    generatorName = 'java'
+    inputSpec = "$projectDir/../spring-boot/src/main/resources/static/api-spec.yaml"
+    outputDir = "$buildDir/generated"
+    apiPackage = 'com.exiasoft.its.refdata.endpoint.rest.api'
+    modelPackage = 'com.exiasoft.its.refdata.endpoint.rest.model'
+    invokerPackage = 'com.exiasoft.its.refdata'
+    ignoreFileOverride = "$projectDir/src/main/resources/.openapi-generator-ignore"
+    configOptions = [
+            'library'          : 'resttemplate',
+            'dateLibrary'      : 'java8',
+            'useTags'          : 'true',
+            'apiDocs'          : 'false',
+            'serializableModel': 'true'
+    ]
+    typeMappings = [
+            'Float': 'java.math.BigDecimal'
+    ]
+}

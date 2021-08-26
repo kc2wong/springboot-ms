@@ -11,12 +11,8 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 @Mapper(componentModel = "spring")
-abstract class MarketPriceMapper {
+abstract class MarketPriceMapper: BaseDtoMapper {
     protected abstract fun internalModel2Dto(marketPrice: MarketPrice, currency: Currency): MarketPriceDto
-
-    protected fun float2BigDecima(float: Float): BigDecimal {
-        return float.toBigDecimal()
-    }
 
     fun model2Dto(marketPrice: MarketPrice, currency: Currency): MarketPriceDto {
         val rtn = internalModel2Dto(marketPrice, currency)
