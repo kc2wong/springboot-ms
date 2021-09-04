@@ -13,12 +13,13 @@ class CurrencyEventListener(
     val currencyService: CurrencyService
 ) {
 
-    @KafkaListener(topics = ["currency_event"], groupId = "\${spring.application.name}", containerFactory = "domainEventListenerContainerFactory")
+    @KafkaListener(topics = ["dbserver1.its_refdata.evt_currency"], groupId = "\${spring.application.name}", containerFactory = "currencyDomainEventListenerContainerFactory")
     fun receiveCurrencyEvent(message: DomainEvent) {
         logger.info { "Received message: $message" }
         val cacheEvictEventType = setOf(DomainEvent.EVENT_TYPE_UPDATE, DomainEvent.EVENT_TYPE_DELETE)
-        if (message.domainModelName == "Currency" && cacheEvictEventType.contains(message.eventType)) {
+        if (message.domainModelName == "CURRENCY" && cacheEvictEventType.contains(message.eventType)) {
             currencyService.evictCurrencyCache(message.domainModelId[0])
         }
     }
+
 }

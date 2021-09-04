@@ -21,6 +21,9 @@ dependencies {
 	compileOnly("org.springframework.data:spring-data-jpa:2.5.3")
 	compileOnly("org.springframework:spring-webmvc:5.3.9")
 	compileOnly("org.hibernate:hibernate-core:5.5.5.Final")
+	compileOnly("com.fasterxml.jackson.core:jackson-databind:2.12.4")
+	compileOnly("org.springframework.kafka:spring-kafka:2.7.4")
+	compileOnly("io.github.microutils:kotlin-logging-jvm:2.0.10")
 
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")

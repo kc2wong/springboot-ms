@@ -1,7 +1,7 @@
 package com.exiasoft.its.refdata.domain.service
 
-import com.exiasoft.its.common.domain.event.DomainEvent
 import com.exiasoft.its.common.domain.model.Locale
+import com.exiasoft.its.common.entity.BaseDomainEventEntity
 import com.exiasoft.its.common.entity.SearchCriteria
 import com.exiasoft.its.common.exception.ValidationException
 import com.exiasoft.its.common.util.JpaUtil
@@ -10,44 +10,42 @@ import com.exiasoft.its.common.util.StringUtil.Companion.EMPTY_STRING
 import com.exiasoft.its.refdata.domain.exception.ErrorCode.Companion.CURRENCY_ALREADY_EXISTS
 import com.exiasoft.its.refdata.domain.exception.ErrorCode.Companion.CURRENCY_NOT_FOUND
 import com.exiasoft.its.refdata.domain.exception.ErrorCode.Companion.INVALID_SORT_CRITERIA
+import com.exiasoft.its.refdata.domain.exception.ErrorCode.Companion.INVALID_VERSION_NUMBER
 import com.exiasoft.its.refdata.domain.exception.ErrorCode.Companion.MISSING_ENGLISH_NAME
 import com.exiasoft.its.refdata.domain.mapper.CurrencyMapper
 import com.exiasoft.its.refdata.domain.model.Currency
+import com.exiasoft.its.refdata.repository.CurrencyDomainEventRepository
 import com.exiasoft.its.refdata.repository.CurrencyRepository
+import com.exiasoft.its.refdata.repository.entity.CurrencyDomainEventEntity
 import com.exiasoft.its.refdata.repository.entity.CurrencyEntity
 import com.exiasoft.its.refdata.repository.entity.CurrencyLocaleEntity
-import org.slf4j.LoggerFactory
-import org.springframework.context.ApplicationEventPublisher
+import mu.KotlinLogging
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.jpa.domain.Specification
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
-import org.springframework.transaction.event.TransactionalEventListener
 import javax.transaction.Transactional
 
+private val logger = KotlinLogging.logger {}
 
 @Service
 class CurrencyService(
     val currencyRepository: CurrencyRepository,
-    val mapper: CurrencyMapper,
-    val kafkaTemplate: KafkaTemplate<String, DomainEvent>,
-    val applicationEventPublisher: ApplicationEventPublisher
+    val currencyDomainEventRepository: CurrencyDomainEventRepository,
+    val mapper: CurrencyMapper
 ) {
 
-    private val logger = LoggerFactory.getLogger(CurrencyService::class.java)
-
     @Transactional
-    fun createCurrency(code: String, decimalPlace: Int, shortName: Map<Locale, String>, name: Map<Locale, String>): Currency {
+    fun createCurrency(currencyCode: String, decimalPlace: Int, shortName: Map<Locale, String>, name: Map<Locale, String>): Currency {
         if (!shortName.containsKey(Locale.EN) || !name.containsKey(Locale.EN)) {
             throw ValidationException(MISSING_ENGLISH_NAME, listOf(Locale.EN.value))
         }
-        currencyRepository.findByCode(code) ?.let {
-            throw ValidationException(CURRENCY_ALREADY_EXISTS, listOf(code))
+        currencyRepository.findByCode(currencyCode) ?.let {
+            throw ValidationException(CURRENCY_ALREADY_EXISTS, listOf(currencyCode))
         }
 
-        val currency = mapper.createModelFromRequest(code, decimalPlace, shortName, name)
+        val currency = mapper.createModelFromRequest(currencyCode, decimalPlace, shortName, name, 0)
         enrichName(currency.name, currency.shortName).let {
             currency.name = it.first
             currency.shortName = it.second
@@ -59,12 +57,9 @@ class CurrencyService(
         }
 
         val savedEntity = currencyRepository.save(currencyEntity)
-        val rtn = mapper.entity2Model(savedEntity)
-        applicationEventPublisher.publishEvent(DomainEvent(
-            domainModelName = Currency::class.simpleName!!,
-            eventType = DomainEvent.EVENT_TYPE_CREATE,
-            domainModelId = listOf(code)))
-        return rtn;
+        val domainEvent = CurrencyDomainEventEntity(BaseDomainEventEntity.EVENT_TYPE_CREATE, listOf(currencyEntity.code), currencyEntity.version)
+        currencyDomainEventRepository.save(domainEvent)
+        return mapper.entity2Model(savedEntity)
     }
 
     @Transactional
@@ -72,8 +67,12 @@ class CurrencyService(
         val currencyEntity = currencyRepository.findByCode(currencyCode)
             ?: throw ValidationException(CURRENCY_NOT_FOUND, listOf(currencyCode))
 
+        if (currency.version != currencyEntity.version) {
+            throw ValidationException(INVALID_VERSION_NUMBER, listOf(currency.version.toString(), currencyEntity.version.toString()))
+        }
+
         // Clone input currency for name enrichment
-        val newCurrency = mapper.createModelFromRequest(currencyCode, currency.decimalPlace, currency.shortName, currency.name)
+        val newCurrency = mapper.createModelFromRequest(currencyCode, currency.decimalPlace, currency.shortName, currency.name, currency.version)
         enrichName(newCurrency.name, newCurrency.shortName).let {
             newCurrency.name = it.first
             newCurrency.shortName = it.second
@@ -98,13 +97,9 @@ class CurrencyService(
 
         // save entity to db
         val savedEntity = currencyRepository.save(currencyEntity)
-        val rtn = mapper.entity2Model(savedEntity)
-        applicationEventPublisher.publishEvent(DomainEvent(
-            domainModelName = Currency::class.simpleName!!,
-            eventType = DomainEvent.EVENT_TYPE_UPDATE,
-            domainModelId = listOf(currencyCode)))
-        return rtn;
-
+        val domainEvent = CurrencyDomainEventEntity(BaseDomainEventEntity.EVENT_TYPE_UPDATE, listOf(currencyEntity.code), currencyEntity.version)
+        currencyDomainEventRepository.save(domainEvent)
+        return mapper.entity2Model(savedEntity)
     }
 
     fun getCurrency(code: String): Currency? {
@@ -166,12 +161,5 @@ class CurrencyService(
             it to (shortNameMap[it] ?: (StringUtil.ensureMaxLength(shortNameMap[it] ?: EMPTY_STRING, 10)))
         }.toMap()
         return Pair(newNameMap, newShortNameMap)
-    }
-
-    @TransactionalEventListener
-    fun doAfterCommit(event: DomainEvent) {
-        // Publish event to notify there is change in currency
-        logger.info("Publish domainEvent $event")
-        kafkaTemplate.send("currency_event", event)     //process here
     }
 }

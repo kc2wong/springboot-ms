@@ -32,7 +32,12 @@ class CurrencyApiDelegateImpl(
             mapper.toShortNameModel(createCurrencyRequestDto.shortName),
             mapper.toNameModel(createCurrencyRequestDto.name)
         )
-        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.domain2Dto(newCurrency))
+        return try {
+            // get version updated image
+            ResponseEntity.status(HttpStatus.CREATED).body(mapper.domain2Dto(currencyService.getCurrency(createCurrencyRequestDto.currencyCode) ?: newCurrency))
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.CREATED).body(mapper.domain2Dto(newCurrency))
+        }
     }
 
     override fun findCurrency(
@@ -68,7 +73,8 @@ class CurrencyApiDelegateImpl(
     override fun putCurrency(currencyCode: String, currencyDto: CurrencyDto): ResponseEntity<CurrencyDto> {
         logger.info { "putCurrency currencyCode = $currencyCode, currencyDto = $currencyDto" }
 
-        val updatedCurrency = currencyService.updateCurrency(currencyCode, mapper.dto2Domain(currencyDto))
-        return ResponseEntity.ok(mapper.domain2Dto(updatedCurrency))
+        currencyService.updateCurrency(currencyCode, mapper.dto2Domain(currencyDto))
+        // get version updated image
+        return getCurrency(currencyCode)
     }
 }

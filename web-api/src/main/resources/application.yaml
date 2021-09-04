@@ -13,6 +13,6 @@ application:
     ref-data: "http://localhost:9000/reference-data-service"
     mkt-data: "http://localhost:9100/market-data-service"
 kafka:
-  bootstrapAddress: "localhost:29092"
+  bootstrapAddress: "localhost:9092"
 server:
   port : 8000

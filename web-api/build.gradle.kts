@@ -30,6 +30,7 @@ dependencies {
 	implementation("javax.validation:validation-api:2.0.1.Final")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4")
+	implementation("com.fasterxml.jackson.core:jackson-databind:2.12.4")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
