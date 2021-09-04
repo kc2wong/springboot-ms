@@ -20,5 +20,8 @@ class ErrorCode: ErrorMessageProvider {
         @ErrorMessage(message = "Missing %s name or shortname", httpStatus = HttpStatus.BAD_REQUEST)
         const val MISSING_ENGLISH_NAME = "REFDATA.00003"
 
+        @ErrorMessage(message = "Record version is not updated, expected = %s, actual = %s", httpStatus = HttpStatus.BAD_REQUEST)
+        const val INVALID_VERSION_NUMBER = "REFDATA.00004"
+
     }
 }

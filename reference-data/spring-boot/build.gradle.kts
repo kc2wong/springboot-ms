@@ -4,6 +4,7 @@ plugins {
 	id("org.springframework.boot") version "2.5.3"
 	id("io.spring.dependency-management") version "1.0.11.RELEASE"
 	id("org.openapi.generator") version "5.1.1"
+
 	kotlin("jvm") version "1.5.21"
 	kotlin("kapt") version "1.5.21"
 	kotlin("plugin.spring") version "1.5.21"
@@ -23,7 +24,6 @@ extra["springCloudVersion"] = "2020.0.3"
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.springframework.kafka:spring-kafka")
 	implementation("org.springframework.cloud:spring-cloud-starter-sleuth")
 
 	implementation("javax.validation:validation-api:2.0.1.Final")
@@ -93,4 +93,3 @@ openApiGenerate {
 		"apiDocs" to "false"
 	))
 }
-

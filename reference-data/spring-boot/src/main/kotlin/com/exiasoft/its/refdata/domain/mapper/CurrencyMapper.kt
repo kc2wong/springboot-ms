@@ -53,15 +53,16 @@ interface CurrencyMapper {
     ])
     fun createDomainFromRequest(request: CreateCurrencyRequest) : Currency
 
-    @Mappings(value = [
-        Mapping(target = "createdBy", ignore = true),
-        Mapping(target = "createdDateTime", ignore = true),
-        Mapping(target = "updatedBy", ignore = true),
-        Mapping(target = "updatedDateTime", ignore = true),
-        Mapping(target = "version", ignore = true)
-    ])
-    fun createModelFromRequest(code: String, decimalPlace: Int, shortName: Map<Locale, String>, name: Map<Locale, String>) : Currency {
-        return createDomainFromRequest(CreateCurrencyRequest(code, decimalPlace, shortName, name))
+//    @Mappings(value = [
+//        Mapping(target = "createdBy", ignore = true),
+//        Mapping(target = "createdDateTime", ignore = true),
+//        Mapping(target = "updatedBy", ignore = true),
+//        Mapping(target = "updatedDateTime", ignore = true),
+//    ])
+    fun createModelFromRequest(code: String, decimalPlace: Int, shortName: Map<Locale, String>, name: Map<Locale, String>, version: Long) : Currency {
+        val rtn = createDomainFromRequest(CreateCurrencyRequest(code, decimalPlace, shortName, name))
+        rtn.version = version
+        return rtn
     }
 
     @Mappings
